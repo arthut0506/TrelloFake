@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+html {
+    overflow-y: hidden;
+}
+
+main {
+    padding: 30px;
+    user-select: none;
+}
+
+header > span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b778c;
+    letter-spacing: 0.02rem;
+}
+
+header > h1 {
+    color: #182b4d;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+#add-column-button {
+    margin: 20px 0;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Cor de fundo do botão */
+    color: #fff; /* Cor do texto */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#add-column-button:hover {
+    background-color: #45a049; /* Cor de fundo ao passar o mouse */
+}
+
+.columns {
+    display: flex;
+    gap: 15px;
+    margin-top: 50px;
+}
+
+.column {
+    width: 100%;
+    min-width: 300px;
+    max-width: 300px;
+    background-color: #bbbbbb82;
+    height: 100dvh;    
+    border-radius: 8px;
+    position: relative; /* Adiciona posição relativa para o botão de excluir */
+}
+
+.column__title {
+    color: #4d5c76;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 20px;
+}
+
+.column__cards {
+    padding: 4px;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.column__delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.card {
+    width: 100%;
+    min-height: 70px;
+    background-color: #fff;
+    border-radius: 5px;
+    border: 1px solid #dfe1e6;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.103);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4d5c76;
+    margin-bottom: 5px;
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Adiciona posição relativa ao cartão */
+}
+
+.card__content {
+    flex: 1;
+    overflow: auto; /* Adiciona rolagem se o conteúdo for muito grande */
+}
+
+.card__button {
+    position: absolute; /* Posiciona o botão de forma absoluta dentro do cartão */
+    bottom: 10px; /* Distância do fundo do cartão */
+    right: 10px; /* Distância da borda direita do cartão */
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.3rem;
+    display: none; /* Oculta o botão por padrão */
+}
+
+.card.selected .card__button {
+    display: block; /* Mostra o botão quando o cartão tem a classe "selected" */
+}
+
+/* Novo estilo para o botão de comentários */
+.card__comment-button {
+    position: absolute; /* Posiciona o botão de forma absoluta dentro do cartão */
+    bottom: 10px; /* Distância do fundo do cartão */
+    right: 50px; /* Distância da borda direita do cartão */
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.3rem;
+    display: none; /* Oculta o botão por padrão */
+}
+
+.card.selected .card__comment-button {
+    display: block; /* Mostra o botão quando o cartão tem a classe "selected" */
+}
+
+/* Estilo da página de comentários */
+.comment-page {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f0f0f0;
+    padding: 20px;
+    overflow: auto;
+}
+
+.comment-page.active {
+    display: block;
+}
+
+.comment-page h2 {
+    margin-top: 0;
+}
+
+.comment-page textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.comment-page button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.comment-page button:hover {
+    background-color: #45a049;
+}
+
+.comment-page .close-button {
+    background-color: #ff4d4d;
+    margin-left: 10px;
+}
