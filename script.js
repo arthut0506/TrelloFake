@@ -29,11 +29,12 @@ const drop = ({ target }) => {
     if (target.classList.contains("column__cards")) {
         target.classList.remove("column__highlight");
         target.append(draggedCard);
+        saveBoardState(); // Salva o estado após mover um cartão
     }
 };
 
 // Função para criar um novo card
-const createCard = ({ target }) => {
+const createCard = ({ target }, contentText = '', comments = '') => {
     if (!target.classList.contains("column__cards")) return;
 
     const card = document.createElement("section");
@@ -43,6 +44,7 @@ const createCard = ({ target }) => {
     const content = document.createElement("div");
     content.className = "card__content";
     content.contentEditable = "true";
+    content.textContent = contentText; // Carrega o texto do cartão
 
     const removeButton = document.createElement("button");
     removeButton.textContent = "X";
@@ -50,120 +52,135 @@ const createCard = ({ target }) => {
 
     removeButton.addEventListener("click", () => {
         card.remove();
+        saveBoardState(); // Salva o estado após remover um cartão
     });
 
     const commentButton = document.createElement("button");
-    commentButton.textContent = "+";
+    commentButton.textContent = "C";
     commentButton.className = "card__comment-button";
 
     commentButton.addEventListener("click", () => {
-        openCommentPage(card);
+        openCommentPage(card, comments); // Abre a página de comentários com comentários carregados
     });
 
-    card.appendChild(content);
-    card.appendChild(removeButton);
-    card.appendChild(commentButton);
+    content.addEventListener("input", saveBoardState); // Salva o estado após editar o conteúdo
 
-    content.addEventListener("focusout", () => {
-        if (!content.textContent.trim()) {
-            card.remove();
-        }
-    });
-
+    card.append(content, removeButton, commentButton);
     card.addEventListener("dragstart", dragStart);
-    target.append(card);
-    content.focus();
+    card.addEventListener("click", () => {
+        selectCard(card);
+    });
+
+    target.appendChild(card);
+    saveBoardState(); // Salva o estado após adicionar um cartão
 };
 
-// Função para criar uma nova coluna
-const createColumn = () => {
-    const column = document.createElement('section');
-    column.className = 'column';
-
-    const title = document.createElement('h2');
-    title.className = 'column__title';
-    title.textContent = 'NOVA COLUNA';
-    title.setAttribute('contenteditable', 'true'); // Torna o título editável
-
-    const cardsContainer = document.createElement('section');
-    cardsContainer.className = 'column__cards';
-
-    // Botão de excluir coluna
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'X';
-    deleteButton.className = 'column__delete-button';
-    deleteButton.addEventListener('click', () => {
-        column.remove();
-    });
-
-    column.appendChild(deleteButton);
-    column.appendChild(title);
-    column.appendChild(cardsContainer);
-
-    columnsContainer.appendChild(column);
-
-    // Adiciona os eventos de arrastar e soltar à nova coluna
-    column.addEventListener('dragover', dragover);
-    column.addEventListener('dragenter', dragenter);
-    column.addEventListener('dragleave', dragleave);
-    column.addEventListener('drop', drop);
-    column.addEventListener('dblclick', createCard);
+// Função para selecionar um card
+const selectCard = (card) => {
+    if (selectedCard) {
+        selectedCard.classList.remove("selected");
+    }
+    selectedCard = card;
+    card.classList.add("selected");
 };
 
 // Função para abrir a página de comentários
-const openCommentPage = (card) => {
-    selectedCard = card;
-    const comments = selectedCard.getAttribute('data-comments') || '';
-    commentPage.innerHTML = `
-        <h2>Comentários</h2>
-        <textarea id="comment-textarea">${comments}</textarea>
-        <button id="save-comments">Salvar Comentários</button>
-        <button class="close-button">Fechar</button>
-    `;
-    commentPage.classList.add('active');
+const openCommentPage = (card, comments) => {
+    commentPage.innerHTML = ''; // Limpa o conteúdo existente
 
-    // Adiciona eventos aos botões
-    document.getElementById('save-comments').addEventListener('click', saveComments);
-    document.querySelector('.close-button').addEventListener('click', closeCommentPage);
-};
+    const title = document.createElement("h2");
+    title.textContent = "Comentários";
 
-// Função para salvar comentários
-const saveComments = () => {
-    const comments = document.getElementById('comment-textarea').value;
-    if (selectedCard) {
-        selectedCard.setAttribute('data-comments', comments);
-    }
-    closeCommentPage();
+    const textarea = document.createElement("textarea");
+    textarea.value = comments; // Carrega os comentários
+
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Salvar";
+
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Fechar";
+    closeButton.className = "close-button";
+
+    saveButton.addEventListener("click", () => {
+        card.dataset.comments = textarea.value; // Salva os comentários no atributo data
+        closeCommentPage();
+        saveBoardState(); // Salva o estado após adicionar/editar comentários
+    });
+
+    closeButton.addEventListener("click", closeCommentPage);
+
+    commentPage.append(title, textarea, saveButton, closeButton);
+    commentPage.classList.add("active");
 };
 
 // Função para fechar a página de comentários
 const closeCommentPage = () => {
-    commentPage.classList.remove('active');
-    selectedCard = null;
+    commentPage.classList.remove("active");
+    commentPage.innerHTML = ''; // Limpa o conteúdo ao fechar
 };
 
-// Adiciona evento de clique ao botão de adicionar coluna
-addColumnButton.addEventListener('click', createColumn);
+// Função para criar uma nova coluna
+const createColumn = (titleText = 'Nova coluna') => {
+    const column = document.createElement("div");
+    column.className = "column";
 
-// Função para selecionar/deselecionar o cartão
-const selectCard = (event) => {
-    const previouslySelectedCard = document.querySelector(".card.selected");
-    if (previouslySelectedCard) {
-        previouslySelectedCard.classList.remove("selected");
-    }
+    const title = document.createElement("div");
+    title.className = "column__title";
+    title.contentEditable = "true";
+    title.textContent = titleText; // Carrega o título da coluna
 
-    const clickedCard = event.currentTarget;
-    if (clickedCard.classList.contains("card")) {
-        clickedCard.classList.add("selected");
-    }
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "column__delete-button";
+    deleteButton.textContent = "Excluir";
+
+    deleteButton.addEventListener("click", () => {
+        column.remove();
+        saveBoardState(); // Salva o estado após remover uma coluna
+    });
+
+    const cardsContainer = document.createElement("div");
+    cardsContainer.className = "column__cards";
+    cardsContainer.addEventListener("dragenter", dragenter);
+    cardsContainer.addEventListener("dragleave", dragleave);
+    cardsContainer.addEventListener("dragover", dragover);
+    cardsContainer.addEventListener("drop", drop);
+    cardsContainer.addEventListener("dblclick", createCard);
+
+    title.addEventListener("input", saveBoardState); // Salva o estado após editar o título
+
+    column.append(title, deleteButton, cardsContainer);
+    columnsContainer.appendChild(column);
+    saveBoardState(); // Salva o estado após adicionar uma coluna
 };
 
-// Adiciona eventos aos cartões existentes
-const addCardEventListeners = () => {
-    document.querySelectorAll(".card").forEach(card => {
-        card.addEventListener("click", selectCard);
+// Função para salvar o estado do quadro no localStorage
+const saveBoardState = () => {
+    const columns = [...columnsContainer.querySelectorAll('.column')].map(column => ({
+        title: column.querySelector('.column__title').textContent,
+        cards: [...column.querySelectorAll('.card')].map(card => ({
+            content: card.querySelector('.card__content').textContent,
+            comments: card.dataset.comments || ''
+        }))
+    }));
+
+    localStorage.setItem('boardState', JSON.stringify(columns));
+};
+
+// Função para carregar o estado do quadro do localStorage
+const loadBoardState = () => {
+    const boardState = JSON.parse(localStorage.getItem('boardState'));
+    if (!boardState) return;
+
+    boardState.forEach(({ title, cards }) => {
+        createColumn(title);
+        const cardsContainer = columnsContainer.lastElementChild.querySelector('.column__cards');
+
+        cards.forEach(({ content, comments }) => {
+            createCard({ target: cardsContainer }, content, comments);
+        });
     });
 };
 
-document.addEventListener("DOMContentLoaded", addCardEventListeners);
-document.addEventListener("click", addCardEventListeners);
+// Eventos iniciais
+addColumnButton.addEventListener('click', () => createColumn());
+document.addEventListener('DOMContentLoaded', loadBoardState);
